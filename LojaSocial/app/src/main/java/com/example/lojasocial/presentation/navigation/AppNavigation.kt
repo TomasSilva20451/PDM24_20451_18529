@@ -170,7 +170,7 @@ fun AppNavigation(navController: NavHostController) {
             )
         }
 
-        // Edit Appointment
+        // EDIT APPOINTMENT
         composable("editAppointment/{appointmentId}") { backStackEntry ->
             val appointmentId = backStackEntry.arguments?.getString("appointmentId") ?: ""
 
@@ -201,7 +201,8 @@ fun AppNavigation(navController: NavHostController) {
                 appointmentId = appointmentId,
                 onFinish = {
                     navController.popBackStack()
-                }
+                },
+                navController = navController // Passando o navController
             )
         }
     }
