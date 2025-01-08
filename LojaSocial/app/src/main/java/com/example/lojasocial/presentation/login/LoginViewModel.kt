@@ -20,7 +20,11 @@ class LoginViewModel(
             _loginState.value = LoginState.Loading
             try {
                 val userData = loginUseCase(email, password)
-                _loginState.value = LoginState.Success(userData)
+                if (email == "admin@gmail.com") {
+                    _loginState.value = LoginState.AdminSuccess(userData)
+                } else {
+                    _loginState.value = LoginState.Success(userData)
+                }
             } catch (e: Exception) {
                 _loginState.value = LoginState.Error(e.message ?: "Erro inesperado.")
             }
@@ -32,5 +36,6 @@ sealed class LoginState {
     object Idle : LoginState()
     object Loading : LoginState()
     data class Success(val userData: UserData) : LoginState()
+    data class AdminSuccess(val userData: UserData) : LoginState()
     data class Error(val message: String) : LoginState()
 }

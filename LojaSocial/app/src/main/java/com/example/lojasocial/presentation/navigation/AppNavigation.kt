@@ -1,5 +1,6 @@
 package com.example.lojasocial.presentation.navigation
 
+import UserManagementViewModel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
@@ -11,6 +12,7 @@ import com.example.lojasocial.presentation.appointment.*
 import com.example.lojasocial.presentation.login.LoginScreen
 import com.example.lojasocial.presentation.login.LoginViewModel
 import com.example.lojasocial.presentation.management.*
+import com.example.lojasocial.presentation.usermanagement.UserManagementScreen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -23,22 +25,26 @@ fun AppNavigation(navController: NavHostController) {
     ) {
         // LOGIN
         composable("login") {
-            // Instanciar Auth
             val auth = FirebaseAuth.getInstance()
             val firestore = FirebaseFirestore.getInstance()
             val authRepository = AuthRepositoryImpl(auth, firestore)
             val loginUseCase = LoginUseCase(authRepository)
 
-            // Usando remember para não recriar ViewModel a cada recomposição
             val loginViewModel = remember {
                 LoginViewModel(loginUseCase)
             }
 
             LoginScreen(
                 viewModel = loginViewModel,
-                onLoginSuccess = {
-                    navController.navigate("management") {
-                        popUpTo("login") { inclusive = true }
+                onLoginSuccess = { email ->
+                    if (email == "admin@gmail.com") {
+                        navController.navigate("userManagement") {
+                            popUpTo("login") { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate("appointmentList") {
+                            popUpTo("login") { inclusive = true }
+                        }
                     }
                 }
             )
@@ -55,7 +61,6 @@ fun AppNavigation(navController: NavHostController) {
             val deleteBeneficiaryUseCase = DeleteBeneficiaryUseCase(beneficiaryRepository)
             val getBeneficiaryByIdUseCase = GetBeneficiaryByIdUseCase(beneficiaryRepository)
 
-            // Usando remember
             val managementViewModel = remember {
                 ManagementViewModel(
                     getAllBeneficiariesUseCase,
@@ -84,8 +89,6 @@ fun AppNavigation(navController: NavHostController) {
             val deleteBeneficiaryUseCase = DeleteBeneficiaryUseCase(beneficiaryRepository)
             val getBeneficiaryByIdUseCase = GetBeneficiaryByIdUseCase(beneficiaryRepository)
 
-            // lembre-se: se você quer MESMO usar o mesmo ViewModel de "management",
-            // poderia navegar com popUpTo ao manager, mas aqui criamos outro
             val managementViewModel = remember {
                 ManagementViewModel(
                     getAllBeneficiariesUseCase,
@@ -117,7 +120,6 @@ fun AppNavigation(navController: NavHostController) {
             val deleteAppointmentUseCase = DeleteAppointmentUseCase(appointmentRepository)
             val getAppointmentByIdUseCase = GetAppointmentByIdUseCase(appointmentRepository)
 
-            // remember para não recriar sempre
             val appointmentViewModel = remember {
                 AppointmentViewModel(
                     createAppointmentUseCase,
@@ -148,7 +150,6 @@ fun AppNavigation(navController: NavHostController) {
             val deleteAppointmentUseCase = DeleteAppointmentUseCase(appointmentRepository)
             val getAppointmentByIdUseCase = GetAppointmentByIdUseCase(appointmentRepository)
 
-            // remember
             val appointmentViewModel = remember {
                 AppointmentViewModel(
                     createAppointmentUseCase,
@@ -177,14 +178,12 @@ fun AppNavigation(navController: NavHostController) {
             val firestore = FirebaseFirestore.getInstance()
             val appointmentRepository = AppointmentRepositoryImpl(firestore)
 
-            // UseCases
             val createAppointmentUseCase = CreateAppointmentUseCase(appointmentRepository)
             val getAllAppointmentsUseCase = GetAllAppointmentsUseCase(appointmentRepository)
             val updateAppointmentUseCase = UpdateAppointmentUseCase(appointmentRepository)
             val deleteAppointmentUseCase = DeleteAppointmentUseCase(appointmentRepository)
             val getAppointmentByIdUseCase = GetAppointmentByIdUseCase(appointmentRepository)
 
-            // ViewModel
             val appointmentViewModel = remember {
                 AppointmentViewModel(
                     createAppointmentUseCase,
@@ -195,15 +194,23 @@ fun AppNavigation(navController: NavHostController) {
                 )
             }
 
-            // Chamamos a tela
             AppointmentEditScreen(
                 viewModel = appointmentViewModel,
                 appointmentId = appointmentId,
                 onFinish = {
                     navController.popBackStack()
                 },
-                navController = navController // Passando o navController
+                navController = navController
             )
+        }
+
+        // USER MANAGEMENT
+        composable("userManagement") {
+            val firestore = FirebaseFirestore.getInstance()
+            val auth = FirebaseAuth.getInstance() // Obter instância do FirebaseAuth
+            val userManagementViewModel = remember { UserManagementViewModel(firestore, auth) }
+
+            UserManagementScreen(viewModel = userManagementViewModel)
         }
     }
 }

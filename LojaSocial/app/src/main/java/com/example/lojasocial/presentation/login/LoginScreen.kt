@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: (String) -> Unit // Agora aceita o email
 ) {
     val loginState by viewModel.loginState.collectAsState()
 
@@ -41,10 +41,15 @@ fun LoginScreen(
                 is LoginState.Error -> Text((loginState as LoginState.Error).message)
                 is LoginState.Success -> {
                     LaunchedEffect(Unit) {
-                        onLoginSuccess()
+                        onLoginSuccess((loginState as LoginState.Success).userData.email)
                     }
-                    Text("Login bem-sucedido! Bem-vindo: ${(loginState as LoginState.Success).userData.email}")
-
+                    Text("Login bem-sucedido!")
+                }
+                is LoginState.AdminSuccess -> {
+                    LaunchedEffect(Unit) {
+                        onLoginSuccess((loginState as LoginState.AdminSuccess).userData.email)
+                    }
+                    Text("Login de administrador bem-sucedido!")
                 }
                 else -> {}
             }

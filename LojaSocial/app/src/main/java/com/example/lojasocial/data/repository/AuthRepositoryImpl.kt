@@ -40,7 +40,7 @@ class AuthRepositoryImpl(
         )
 
         // Salvar no Firestore
-        firestore.collection("usuarios").document(newUser.uid)
+        firestore.collection("users").document(newUser.uid)
             .set(userData)
             .await()
 
